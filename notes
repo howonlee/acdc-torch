@@ -1,0 +1,2 @@
+install fftw3 (ubuntu has it in default ppas, I think)
+revert to f16dfa3c - you need it to make, altho you can also kill the other things
