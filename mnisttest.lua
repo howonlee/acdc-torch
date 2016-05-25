@@ -9,17 +9,15 @@ inputs = 784; outputs = 10; HUs=200;
 mlp:add(nn.Reshape(784))
 mlp:add(nn.Linear(inputs, HUs))
 mlp:add(nn.Tanh())
-mlp:add(acdc.ACDC(HUs))
--- mlp:add(nn.Linear(HUs, HUs))
-mlp:add(nn.Tanh())
+--mlp:add(nn.Linear(HUs, HUs))
 mlp:add(nn.Linear(HUs, outputs))
 mlp:add(nn.LogSoftMax())
 crit = nn.ClassNLLCriterion()
 local trainset = mnist.traindataset()
 local testset = mnist.testdataset()
 
-for i = 1,40000 do
-  if math.fmod(i, 1000) == 0 then
+for i = 1,5000 do
+  if math.fmod(i, 100) == 0 then
     print(i)
   end
   local input = trainset[i].x:double()
@@ -37,15 +35,13 @@ for i = 1,40000 do
   mlp:updateParameters(0.01)
 end
 
+print('start the eval')
 local total_acc = 0.0;
 for j = 1,5000 do
   local curr_in = testset[j].x:double()
   local curr_out = testset[j].y + 1
-  res = mlp:forward(curr_in)
-  -- _, res = torch.max(mlp:forward(curr_in), 1)
-  print(res)
-  print(curr_out)
-  if res == curr_out then
+  _, res = torch.max(mlp:forward(curr_in), 1)
+  if res[1] == curr_out then
     total_acc = total_acc + 1
   end
 end
