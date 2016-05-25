@@ -13,7 +13,8 @@ mlp:add(acdc.ACDC(HUs))
 -- mlp:add(nn.Linear(HUs, HUs))
 mlp:add(nn.Tanh())
 mlp:add(nn.Linear(HUs, outputs))
-crit = nn.MSECriterion()
+mlp:add(nn.LogSoftMax())
+crit = nn.ClassNLLCriterion()
 local trainset = mnist.traindataset()
 local testset = mnist.testdataset()
 
@@ -22,8 +23,8 @@ for i = 1,40000 do
     print(i)
   end
   local input = trainset[i].x:double()
-  local output = torch.Tensor(10):double()
-  output[(trainset[i].y)+1] = 1.0
+  local output = trainset[i].y + 1 -- I am pretty sure this is not how it's supposed to work
+  -- local output = torch.Tensor(10):double()
 
   crit:forward(mlp:forward(input), output)
 
@@ -40,8 +41,8 @@ local total_acc = 0.0;
 for j = 1,5000 do
   local curr_in = testset[j].x:double()
   local curr_out = testset[j].y + 1
-  res = mlp.forward(curr_in)
-  _, res = torch.max(mlp:forward(curr_in), 1)
+  res = mlp:forward(curr_in)
+  -- _, res = torch.max(mlp:forward(curr_in), 1)
   print(res)
   print(curr_out)
   if res == curr_out then
