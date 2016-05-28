@@ -9,7 +9,8 @@ inputs = 784; outputs = 10; HUs=200;
 mlp:add(nn.Reshape(784))
 mlp:add(nn.Linear(inputs, HUs))
 mlp:add(nn.Tanh())
---mlp:add(nn.Linear(HUs, HUs))
+mlp:add(nn.Linear(HUs, HUs))
+mlp:add(nn.Tanh())
 mlp:add(nn.Linear(HUs, outputs))
 mlp:add(nn.LogSoftMax())
 crit = nn.ClassNLLCriterion()
@@ -37,12 +38,16 @@ end
 
 print('start the eval')
 local total_acc = 0.0;
+local total = 0.0;
 for j = 1,5000 do
   local curr_in = testset[j].x:double()
   local curr_out = testset[j].y + 1
+  print(mlp:forward(curr_in))
   _, res = torch.max(mlp:forward(curr_in), 1)
   if res[1] == curr_out then
     total_acc = total_acc + 1
   end
+  total = total + 1
 end
 print(total_acc)
+print(total)
