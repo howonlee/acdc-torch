@@ -12,10 +12,14 @@ function FastACDC:__init(dim, opt)
     end
     self.sign_init = opt.sign_init or false
     self.rand_init = opt.rand_init or false
+    self.init_val = opt.init_val or 0.01
+    self.init_bias = opt.init_bias or 0.0
   else
     self.use_bias = true
     self.sign_init = false
     self.rand_init = false
+    self.init_val = 0.01
+    self.init_bias = 0.0
   end
 
   assert(dim % 2 == 0, "Input size must be even.  Odd sizes are not supported.")
@@ -52,12 +56,12 @@ function FastACDC:reset()
   end
 
   if self.rand_init then
-    self.A:add(self.A:clone():uniform(-0.01, 0.01))
-    self.D:add(self.D:clone():uniform(-0.01, 0.01))
+    self.A:add(self.A:clone():uniform(-self.init_val, self.init_val))
+    self.D:add(self.D:clone():uniform(-self.init_val, self.init_val))
   end
 
-  self.Ab:fill(0)
-  self.Db:fill(0)
+  self.Ab:fill(self.init_bias)
+  self.Db:fill(self.init_bias)
 
   self.gradA:fill(0)
   self.gradAb:fill(0)

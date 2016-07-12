@@ -4,21 +4,28 @@ require 'nn'
 require 'math'
 local mnist = require 'mnist'
 
+wobbly = acdc.FastACDC(100)
+thing, _ = wobbly:getParameters()
+print(thing:size())
+
 mlp = nn.Sequential();
 inputs = 784; outputs = 10; HUs=200;
 mlp:add(nn.Reshape(784))
 mlp:add(nn.Linear(inputs, HUs))
 mlp:add(nn.Tanh())
-mlp:add(nn.Linear(HUs, HUs))
+mlp:add(acdc.ACDC(HUs))
 mlp:add(nn.Tanh())
+mlp:add(acdc.Permutation(HUs))
+-- mlp:add(nn.Linear(HUs, HUs))
+-- mlp:add(nn.Tanh())
 mlp:add(nn.Linear(HUs, outputs))
 mlp:add(nn.LogSoftMax())
 crit = nn.ClassNLLCriterion()
 local trainset = mnist.traindataset()
 local testset = mnist.testdataset()
 
-for i = 1,5000 do
-  if math.fmod(i, 100) == 0 then
+for i = 1,50000 do
+  if math.fmod(i, 400) == 0 then
     print(i)
   end
   local input = trainset[i].x:double()
@@ -33,7 +40,7 @@ for i = 1,5000 do
   -- (2) accumulate gradients
   mlp:backward(input, crit:backward(mlp.output, output))
   -- (3) update parameters with a 0.01 learning rate
-  mlp:updateParameters(0.01)
+  mlp:updateParameters(0.0005)
 end
 
 print('start the eval')
@@ -42,8 +49,7 @@ local total = 0.0;
 for j = 1,5000 do
   local curr_in = testset[j].x:double()
   local curr_out = testset[j].y + 1
-  print(mlp:forward(curr_in))
-  _, res = torch.max(mlp:forward(curr_in), 1)
+  _, res = torch.max(torch.exp(mlp:forward(curr_in)), 1)
   if res[1] == curr_out then
     total_acc = total_acc + 1
   end
